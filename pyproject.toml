@@ -1,10 +1,11 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Learning center Backend recreated in fastapi"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "alembic>=1.18.4",
     "email-validator>=2.3.0",
     "fastapi>=0.135.1",
     "passlib[bcrypt]>=1.7.4",
