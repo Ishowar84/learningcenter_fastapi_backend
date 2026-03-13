@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
+    # CORS
+    # You can add production URLs later in the .env file like this:
+    # BACKEND_CORS_ORIGINS=["https://my-frontend.com", "http://localhost:5173"]
+    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:8081"]
+    
     # Database
     DATABASE_URL: Optional[str] = "sqlite:///./sql_app.db"
     
