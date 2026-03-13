@@ -6,8 +6,6 @@ This is the FastAPI-based backend for the Learning Center project, featuring:
 - **ORM**: SQLAlchemy with PostgreSQL support.
 - **Package Management**: Managed with `uv`.
 
-## GitHub Repository
-[https://github.com/Ishowar84/learningcenter_fastapi_backend.git](https://github.com/Ishowar84/learningcenter_fastapi_backend.git)
 
 ## Getting Started
 

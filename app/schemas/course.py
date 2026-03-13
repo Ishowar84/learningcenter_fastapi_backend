@@ -1,8 +1,8 @@
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import Optional
+from app.schemas.base import CamelModel
 
 # Subject Schemas
-class SubjectBase(BaseModel):
+class SubjectBase(CamelModel):
     name: str
     description: Optional[str] = None
 
@@ -15,11 +15,8 @@ class SubjectUpdate(SubjectBase):
 class Subject(SubjectBase):
     id: int
 
-    class Config:
-        from_attributes = True
-
 # Course Schemas
-class CourseBase(BaseModel):
+class CourseBase(CamelModel):
     title: str
     description: Optional[str] = None
     grade_level: Optional[str] = None
@@ -35,9 +32,6 @@ class CourseUpdate(CourseBase):
 class Course(CourseBase):
     id: int
     teacher_id: Optional[int] = None
-
-    class Config:
-        from_attributes = True
         
 class CourseWithSubject(Course):
     subject: Subject

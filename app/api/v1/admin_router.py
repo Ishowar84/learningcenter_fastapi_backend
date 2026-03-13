@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends
 from app.api.deps import RoleChecker
 from app.models.user_role import UserRole
+from app.schemas.admin import AdminStatsResponse, AdminSettingsResponse
 
 router = APIRouter()
 
 admin_check = RoleChecker([UserRole.ADMIN])
 
-@router.get("/stats")
+@router.get("/stats", response_model=AdminStatsResponse)
 async def get_admin_stats(current_user: dict = Depends(admin_check)):
     return {
         "message": "Welcome, Administrator!",
@@ -17,6 +18,6 @@ async def get_admin_stats(current_user: dict = Depends(admin_check)):
         }
     }
 
-@router.get("/settings")
+@router.get("/settings", response_model=AdminSettingsResponse)
 async def get_admin_settings(current_user: dict = Depends(admin_check)):
     return {"system_status": "All systems operational", "version": "1.0.0"}
