@@ -34,9 +34,30 @@ class UserBase(CamelModel):
 class UserCreate(UserBase):
     password: str
 
-class UserUpdate(UserBase):
-    role: Optional[UserRole] = None
-    password: Optional[str] = None
+class UserUpdate(CamelModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip_code: Optional[str] = None
+    country: Optional[str] = None
+    bio: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    gender: Optional[str] = None
+    timezone: Optional[str] = None
+    avatar_url: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    cover_photo_url: Optional[str] = None
+    subject: Optional[str] = None
+    education: Optional[str] = None
+    certifications: Optional[str] = None
+
+class ChangePasswordRequest(CamelModel):
+    current_password: str
+    new_password: str
 
 class User(UserBase):
     id: str

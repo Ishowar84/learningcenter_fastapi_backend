@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, Response
 from sqlalchemy.orm import Session
 from app.api import deps
 from app.models.course import Course
@@ -100,15 +100,19 @@ async def create_course(
     return db_course
 
 @router.put("/{course_id}", response_model=CourseSchema)
+@router.patch("/{course_id}", response_model=CourseSchema)
 async def update_course(
     *,
     db: Session = Depends(deps.get_db),
     course_id: str,
     course_in: CourseUpdate,
+    request: Request,
     current_user: User = Depends(admin_or_teacher_check)
 ):
     """
-    Update a course. Admins can update any, teachers can update their own.
+    Update a course. 
+    - PATCH: Partial update (only fields provided are changed)
+    - PUT: Full update (replaces all fields, missing fields set to default/None)
     """
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
@@ -118,7 +122,9 @@ async def update_course(
     if current_user.role == UserRole.TEACHER and course.teacher_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not enough permissions to edit this course")
         
-    update_data = course_in.dict(exclude_unset=True)
+    # Partial update for PATCH, Full update for PUT
+    is_patch = request.method.upper() == "PATCH"
+    update_data = course_in.dict(exclude_unset=is_patch)
     
     for field, value in update_data.items():
         setattr(course, field, value)

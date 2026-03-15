@@ -6,7 +6,7 @@ from app.api import deps
 from app.core import security
 from app.core.config import settings
 from app.schemas.token import LoginResponse
-from app.schemas.user import User
+from app.schemas.user import User, UserUpdate, ChangePasswordRequest
 from app.services import user_service
 
 router = APIRouter()
@@ -67,3 +67,53 @@ async def read_current_user_info(
     Get current logged in user information.
     """
     return current_user
+
+@router.put("/user", response_model=User)
+@router.patch("/user", response_model=User)
+async def update_current_user(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_in: UserUpdate,
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    Update current user profile.
+    """
+    update_data = user_in.dict(exclude_unset=True)
+    
+    # Special handling for first_name + last_name -> name
+    if "first_name" in update_data or "last_name" in update_data:
+        fn = update_data.get("first_name", current_user.first_name)
+        ln = update_data.get("last_name", current_user.last_name)
+        update_data["name"] = f"{fn} {ln}"
+
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+        
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@router.post("/change-password")
+async def change_password(
+    *,
+    db: Session = Depends(deps.get_db),
+    password_in: ChangePasswordRequest,
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    Change password for the current user.
+    """
+    if not security.verify_password(password_in.current_password, current_user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect old password",
+        )
+    
+    current_user.password = security.get_password_hash(password_in.new_password)
+    current_user.requires_password_reset = False # Successfully changed
+    
+    db.add(current_user)
+    db.commit()
+    return {"message": "Password updated successfully"}
