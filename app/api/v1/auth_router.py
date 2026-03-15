@@ -11,16 +11,22 @@ from app.services import user_service
 
 router = APIRouter()
 
+from pydantic import BaseModel
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 @router.post("/login", response_model=LoginResponse)
 async def login(
-    db: Session = Depends(deps.get_db),
-    form_data: OAuth2PasswordRequestForm = Depends()
+    request_data: LoginRequest,
+    db: Session = Depends(deps.get_db)
 ):
     """
-    OAuth2 compatible token login, retrieve an access token for future requests.
+    JSON token login, retrieve an access token for future requests.
     """
     user = user_service.authenticate(
-        db, email=form_data.username, password=form_data.password
+        db, email=request_data.email, password=request_data.password
     )
     if not user:
         raise HTTPException(
