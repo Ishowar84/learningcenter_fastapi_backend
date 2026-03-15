@@ -1,0 +1,13 @@
+{
+    "venvPath": ".",
+    "venv": ".venv",
+    "pythonPath": ".venv/Scripts/python",
+    "analysis": {
+        "extraPaths": [
+            "."
+        ],
+        "typeCheckingMode": "basic",
+        "autoSearchPaths": true,
+        "useLibraryCodeForTypes": true
+    }
+}
