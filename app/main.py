@@ -1,7 +1,10 @@
 import socket
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.core.config import settings
 from app.api.v1 import auth_router, admin_router, courses_router, users_router
 
@@ -42,6 +45,33 @@ if settings.BACKEND_CORS_ORIGINS:
 @app.get("/")
 async def root():
     return {"message": "Welcome to Learning Center API", "docs": "/docs"}
+
+# Global Exception Handlers
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "error": str(exc.detail)}
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    error_msg = "; ".join([f"{'.'.join([str(loc) for loc in err['loc']])}: {err['msg']}" for err in errors])
+    return JSONResponse(
+        status_code=422,
+        content={"success": False, "error": f"Validation error: {error_msg}"}
+    )
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    import traceback
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "error": str(exc) or "Internal server error"}
+    )
+
 
 # Include routers
 app.include_router(auth_router.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])

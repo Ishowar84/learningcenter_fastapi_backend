@@ -15,6 +15,11 @@ from app.db.session import Base
 # Import models for discovery
 from app.models.user import User, Partner
 from app.models.course import Subject, Course
+from app.models.enrollment import Enrollment, EnrollmentRequest
+from app.models.schedule import Schedule, ScheduleRecurrence
+from app.models.attendance import Attendance
+from app.models.message import Message, MessageAttachment
+from app.models.billing import FeePlan, Invoice, Payment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
