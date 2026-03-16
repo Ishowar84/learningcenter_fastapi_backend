@@ -6,6 +6,8 @@ from app.models.course import Course
 from app.models.user import User
 from app.models.user_role import UserRole
 from app.schemas.course import Course as CourseSchema, CourseCreate, CourseUpdate
+from app.schemas.enrollment import EnrollmentRequest
+from app.services import enrollment_service
 from fastapi.security import OAuth2PasswordBearer
 from app.core.config import settings
 
@@ -77,6 +79,20 @@ async def read_course(
         raise HTTPException(status_code=403, detail="Don't have permission to view this inactive course")
         
     return course
+
+@router.get("/{course_id}/enrollments", response_model=List[EnrollmentRequest])
+async def read_course_enrollments(
+    course_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    Get all enrollment requests for a specific course (Admin/Teacher only)
+    """
+    if current_user.role not in [UserRole.ADMIN, UserRole.TEACHER, UserRole.PARTNER_ADMIN]:
+        raise HTTPException(status_code=403, detail="Not authorized to view course enrollments")
+        
+    return enrollment_service.get_enrollment_requests_for_course(db, course_id)
 
 @router.post("/", response_model=CourseSchema, status_code=status.HTTP_201_CREATED)
 async def create_course(

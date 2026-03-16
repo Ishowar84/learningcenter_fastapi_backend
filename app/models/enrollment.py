@@ -15,6 +15,9 @@ class Enrollment(Base):
     rejected_at = Column(DateTime(timezone=True), nullable=True)
     rejection_reason = Column(Text, nullable=True)
     enrolled_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    student = relationship("User", foreign_keys=[student_id])
+    course = relationship("Course", foreign_keys=[course_id])
 
     __table_args__ = (
         UniqueConstraint('student_id', 'course_id', name='unique_student_course_enrollment'),
@@ -36,6 +39,10 @@ class EnrollmentRequest(Base):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    student = relationship("User", foreign_keys=[student_id])
+    course = relationship("Course", foreign_keys=[course_id])
+    parent = relationship("User", foreign_keys=[parent_id])
 
     __table_args__ = (
         UniqueConstraint('student_id', 'course_id', name='unique_student_course_request'),

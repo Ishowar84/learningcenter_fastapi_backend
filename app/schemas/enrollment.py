@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
+from app.schemas.base import CamelModel
+from app.schemas.user import User
 
-class EnrollmentRequestBase(BaseModel):
+class EnrollmentRequestBase(CamelModel):
     course_id: str
     student_id: str
     parent_id: str
@@ -30,9 +32,9 @@ class EnrollmentRequestInDBBase(EnrollmentRequestBase):
         from_attributes = True
 
 class EnrollmentRequest(EnrollmentRequestInDBBase):
-    pass
+    student: Optional[User] = None
 
-class EnrollmentBase(BaseModel):
+class EnrollmentBase(CamelModel):
     course_id: str
     student_id: str
 
@@ -55,4 +57,4 @@ class EnrollmentInDBBase(EnrollmentBase):
         from_attributes = True
 
 class Enrollment(EnrollmentInDBBase):
-    pass
+    student: Optional[User] = None

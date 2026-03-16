@@ -22,6 +22,10 @@ def get_enrollment_requests_for_course(db: Session, course_id: str) -> List[Enro
     """Get all enrollment requests for a specific course (admin view)."""
     return db.query(EnrollmentRequest).filter(EnrollmentRequest.course_id == course_id).all()
 
+def get_enrollments_for_course(db: Session, course_id: str) -> List[Enrollment]:
+    """Get all finalized enrollments for a specific course."""
+    return db.query(Enrollment).filter(Enrollment.course_id == course_id).all()
+
 def create_enrollment_request(db: Session, request_in: EnrollmentRequestCreate, requester: User) -> EnrollmentRequest:
     """Create a new enrollment request."""
     # Ensure neither the student nor the course are bogus
