@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.core.config import settings
-from app.api.v1 import auth_router, admin_router, courses_router, users_router, enrollments_router
+from app.api.v1 import auth_router, admin_router, courses_router, users_router, enrollments_router, assignments_router, submissions_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
