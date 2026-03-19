@@ -51,3 +51,6 @@ class RoleChecker:
                 detail=f"Role {user.role} is not allowed to access this resource",
             )
         return user
+
+# Alias for routers that use the longer name
+get_current_active_user = get_current_user
