@@ -1,5 +1,6 @@
 import socket
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -10,14 +11,13 @@ from app.api.v1 import auth_router, admin_router, courses_router, users_router, 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Determine local network IP
     hostname = socket.gethostname()
     local_ip = "127.0.0.1"
     try:
         local_ip = socket.gethostbyname(hostname)
     except Exception:
         pass
-    
+
     print("\n" + "="*50)
     print(f"🚀 {settings.PROJECT_NAME} is running!")
     print(f"➜  Local:   http://127.0.0.1:8000/docs")
@@ -45,6 +45,43 @@ if settings.BACKEND_CORS_ORIGINS:
 @app.get("/")
 async def root():
     return {"message": "Welcome to Learning Center API", "docs": "/docs"}
+
+@app.get("/uptime", tags=["uptime"])
+async def uptime_check(request: Request):
+    """
+    Public uptime endpoint — no authentication required.
+    Logs each ping (timestamp only) to the database.
+    Cleans up entries older than 24 hours to keep the table lean.
+    Intended for use with Uptime Robot to keep Render free tier alive.
+    """
+    from app.db.session import SessionLocal
+    from app.models.health_check import UptimeLog
+
+    db = SessionLocal()
+    try:
+        # Insert a new ping log
+        log = UptimeLog()
+        db.add(log)
+
+        # Delete entries older than 24 hours
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        db.query(UptimeLog).filter(UptimeLog.called_at < cutoff).delete()
+
+        db.commit()
+
+        # Count pings in last 24 hours
+        recent_count = db.query(UptimeLog).count()
+    except Exception:
+        db.rollback()
+        recent_count = -1
+    finally:
+        db.close()
+
+    return {
+        "status": "ok",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "pings_last_24h": recent_count,
+    }
 
 # Global Exception Handlers
 @app.exception_handler(StarletteHTTPException)
