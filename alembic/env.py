@@ -20,6 +20,7 @@ from app.models.schedule import Schedule, ScheduleRecurrence
 from app.models.attendance import Attendance
 from app.models.message import Message, MessageAttachment
 from app.models.billing import FeePlan, Invoice, Payment
+from app.models.assignment import Assignment, Submission, Grade
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

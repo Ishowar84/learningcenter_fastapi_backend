@@ -32,11 +32,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Set all CORS enabled origins
+# CORS Configuration
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_origins=[str(origin).rstrip("/") for origin in settings.BACKEND_CORS_ORIGINS],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -80,3 +80,5 @@ app.include_router(courses_router.router, prefix=f"{settings.API_V1_STR}/courses
 app.include_router(users_router.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
 app.include_router(users_router.router, prefix=f"{settings.API_V1_STR}/admin/users", tags=["admin-users"])
 app.include_router(enrollments_router.router, prefix=f"{settings.API_V1_STR}/enrollments", tags=["enrollments"])
+app.include_router(assignments_router.router, prefix=f"{settings.API_V1_STR}/assignments", tags=["assignments"])
+app.include_router(submissions_router.router, prefix=f"{settings.API_V1_STR}/submissions", tags=["submissions"])
