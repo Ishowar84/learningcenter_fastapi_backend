@@ -4,6 +4,24 @@ from pydantic import Field
 from .base import CamelModel
 from app.models.assignment import AssignmentType
 
+class AssignmentAttachmentBase(CamelModel):
+    type: str
+    url: str
+    file_name: Optional[str] = None
+    file_size: Optional[int] = None
+    mime_type: Optional[str] = None
+
+class AssignmentAttachmentCreate(AssignmentAttachmentBase):
+    assignment_id: str
+
+class AssignmentAttachment(AssignmentAttachmentBase):
+    id: str
+    assignment_id: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 class AssignmentBase(CamelModel):
     title: str
     description: Optional[str] = None
@@ -33,6 +51,25 @@ class Assignment(AssignmentBase):
     teacher_id: str
     created_at: datetime
     updated_at: Optional[datetime]
+    attachments: List[AssignmentAttachment] = []
+
+    class Config:
+        from_attributes = True
+
+class SubmissionAttachmentBase(CamelModel):
+    type: str # 'file' or 'link'
+    url: str
+    file_name: Optional[str] = None
+    file_size: Optional[int] = None
+    mime_type: Optional[str] = None
+
+class SubmissionAttachmentCreate(SubmissionAttachmentBase):
+    submission_id: str
+
+class SubmissionAttachment(SubmissionAttachmentBase):
+    id: str
+    submission_id: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -50,6 +87,7 @@ class Submission(SubmissionBase):
     student_id: str
     submitted_at: datetime
     updated_at: Optional[datetime]
+    attachments: List[SubmissionAttachment] = []
 
     class Config:
         from_attributes = True

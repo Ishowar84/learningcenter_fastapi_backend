@@ -35,7 +35,24 @@ class Assignment(Base):
     # Relationships
     course = relationship("Course", back_populates="assignments")
     teacher = relationship("User", foreign_keys=[teacher_id])
+    attachments = relationship("AssignmentAttachment", back_populates="assignment", cascade="all, delete-orphan")
     submissions = relationship("Submission", back_populates="assignment", cascade="all, delete-orphan")
+
+class AssignmentAttachment(Base):
+    __tablename__ = "assignment_attachments"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    assignment_id = Column(String, ForeignKey("assignments.id", ondelete="CASCADE"), nullable=False)
+    
+    type = Column(String, nullable=False) # 'file' or 'link'
+    url = Column(String, nullable=False)
+    file_name = Column(String)
+    file_size = Column(Integer)
+    mime_type = Column(String)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    assignment = relationship("Assignment", back_populates="attachments")
 
 class Submission(Base):
     __tablename__ = "submissions"
@@ -53,7 +70,24 @@ class Submission(Base):
     # Relationships
     assignment = relationship("Assignment", back_populates="submissions")
     student = relationship("User", foreign_keys=[student_id])
+    attachments = relationship("SubmissionAttachment", back_populates="submission", cascade="all, delete-orphan")
     grade = relationship("Grade", back_populates="submission", uselist=False, cascade="all, delete-orphan")
+
+class SubmissionAttachment(Base):
+    __tablename__ = "submission_attachments"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    submission_id = Column(String, ForeignKey("submissions.id", ondelete="CASCADE"), nullable=False)
+    
+    type = Column(String, nullable=False) # 'file' or 'link'
+    url = Column(String, nullable=False)
+    file_name = Column(String)
+    file_size = Column(Integer)
+    mime_type = Column(String)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    submission = relationship("Submission", back_populates="attachments")
 
 class Grade(Base):
     __tablename__ = "grades"
