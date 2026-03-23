@@ -21,6 +21,7 @@ from app.models.attendance import Attendance
 from app.models.message import Message, MessageAttachment
 from app.models.billing import FeePlan, Invoice, Payment
 from app.models.assignment import Assignment, Submission, Grade
+from app.models.health_check import UptimeLog
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
