@@ -58,6 +58,7 @@ async def uptime_check(request: Request):
     from app.models.health_check import UptimeLog
 
     db = SessionLocal()
+    error_detail = None
     try:
         # Insert a new ping log
         log = UptimeLog()
@@ -71,16 +72,19 @@ async def uptime_check(request: Request):
 
         # Count pings in last 24 hours
         recent_count = db.query(UptimeLog).count()
-    except Exception:
+    except Exception as e:
         db.rollback()
+        error_detail = str(e)
+        print(f"❌ Uptime log failed: {error_detail}")
         recent_count = -1
     finally:
         db.close()
 
     return {
-        "status": "ok",
+        "status": "ok" if recent_count != -1 else "error",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "pings_last_24h": recent_count,
+        "detail": error_detail
     }
 
 # Global Exception Handlers
