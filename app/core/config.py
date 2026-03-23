@@ -18,10 +18,17 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:8081"]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+    def assemble_cors_origins(cls, v: Union[str, List[str]], info) -> Union[List[str], str]:
+        # Handle Render's ALLOWED_ORIGINS if provided
+        if not v and "ALLOWED_ORIGINS" in info.data:
+            v = info.data["ALLOWED_ORIGINS"]
+            
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         return v
+    
+    # Render fallback for CORS
+    ALLOWED_ORIGINS: Optional[str] = None
     
     # Database
     DATABASE_URL: Optional[str] = "sqlite:///./sql_app.db"
@@ -29,9 +36,34 @@ class Settings(BaseSettings):
     # Cloud Storage (Supabase S3 Compatible)
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
-    AWS_REGION: str = "us-east-1" # Supabase often uses us-east-1 for its S3 gateway
+    
+    # Render Aliases for Storage
+    AWS_S3_REGION_NAME: Optional[str] = None
+    AWS_S3_ENDPOINT_URL: Optional[str] = None
+    AWS_STORAGE_BUCKET_NAME: Optional[str] = None
+    
+    # Original Storage Names with Fallbacks
+    AWS_REGION: str = "us-east-1"
     S3_ENDPOINT_URL: Optional[str] = None
     S3_BUCKET_NAME: str = "assignments"
+
+    @field_validator("DATABASE_URL", mode="before")
+    def fix_postgres_url(cls, v: Optional[str]) -> Optional[str]:
+        if v and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
+    @field_validator("AWS_REGION", mode="before")
+    def set_region(cls, v: str, info) -> str:
+        return info.data.get("AWS_S3_REGION_NAME") or v
+
+    @field_validator("S3_ENDPOINT_URL", mode="before")
+    def set_endpoint(cls, v: Optional[str], info) -> Optional[str]:
+        return info.data.get("AWS_S3_ENDPOINT_URL") or v
+
+    @field_validator("S3_BUCKET_NAME", mode="before")
+    def set_bucket(cls, v: str, info) -> str:
+        return info.data.get("AWS_STORAGE_BUCKET_NAME") or v
     
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
